@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offer Decoder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink: #16110d;
+    --paper: #efe7db;
+    --card: #f7f2ea;
+    --line: #d8cbb8;
+    --accent: #1f6f5c;
+    --accent-soft: #d6e5df;
+    --muted: #7a6f61;
+    --amber: #b8732a;
+    --shadow: 0 1px 0 #fff inset, 0 12px 28px -18px rgba(31,17,13,.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(31,111,92,.06), transparent 40%),
+      radial-gradient(circle at 90% 92%, rgba(184,115,42,.06), transparent 42%);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.55;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 42px 28px 80px;
+  }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1.5px solid var(--line);
+    padding-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .brand-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .tag {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 340px;
+    text-align: right;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+    margin-top: 34px;
+  }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    min-height: 480px;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    background: var(--ink);
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+    border-radius: 3px;
+  }
+  .panel-head h2 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  textarea {
+    flex: 1;
+    border: none;
+    background: transparent;
+    resize: none;
+    padding: 20px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+    outline: none;
+  }
+  textarea::placeholder { color: #a89a88; }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+  }
+  .count { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
+
+  button.go {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: .02em;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    padding: 11px 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: transform .12s ease, background .2s ease, opacity .2s;
+  }
+  button.go:hover { background: #1a5f4f; transform: translateY(-1px); }
+  button.go:active { transform: translateY(0); }
+  button.go:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  button.ghost {
+    background: none; border: 1px solid var(--line);
+    color: var(--muted); font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; padding: 7px 12px; border-radius: 3px; cursor: pointer;
+  }
+  button.ghost:hover { border-color: var(--muted); color: var(--ink); }
+
+  /* Output */
+  .out { flex: 1; padding: 6px 20px 20px; overflow-y: auto; }
+  .placeholder {
+    height: 100%;
+    display: grid; place-items: center;
+    text-align: center;
+    color: #a89a88;
+    padding: 40px;
+  }
+  .placeholder .mk {
+    font-family: 'Fraunces', serif;
+    font-size: 46px;
+    color: var(--line);
+    margin-bottom: 12px;
+  }
+
+  .block { margin-top: 22px; }
+  .block:first-child { margin-top: 8px; }
+  .block .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px;
+  }
+  .block .label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .role-title {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+  .summary { font-size: 15px; color: #3a3229; }
+  ul.clean { list-style: none; }
+  ul.clean li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 14.5px;
+  }
+  ul.clean li::before {
+    content: '';
+    position: absolute; left: 2px; top: 9px;
+    width: 6px; height: 6px;
+    background: var(--amber);
+    border-radius: 50%;
+  }
+  ul.nice li::before { background: var(--muted); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    background: var(--accent-soft);
+    color: #1a5f4f;
+    border: 1px solid #bcd4cc;
+  }
+
+  .loading { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 14px; padding: 30px 0; }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .err {
+    background: #f7e4d8; border: 1px solid #e0b393;
+    color: #8a4419; font-size: 14px;
+    padding: 14px 16px; border-radius: 3px; margin-top: 12px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand-eyebrow">Job hunt · working tool</div>
+      <h1>Offer <em>Decoder</em></h1>
+    </div>
+    <p class="tag">Paste a long job posting. Get the shape of it — role, real requirements, and what's just nice to have.</p>
+  </header>
+
+  <div class="grid">
+    <!-- INPUT -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="num">1</span>
+        <h2>Paste the offer</h2>
+      </div>
+      <textarea id="input" placeholder="Drop the full job description here — responsibilities, requirements, the corporate boilerplate, all of it."></textarea>
+      <div class="bar">
+        <span class="count" id="count">0 words</span>
+        <div style="display:flex; gap:10px;">
+          <button class="ghost" id="clear">Clear</button>
+          <button class="go" id="run">Simplify →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- OUTPUT -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="num">2</span>
+        <h2>The clear version</h2>
+      </div>
+      <div class="out" id="out">
+        <div class="placeholder">
+          <div>
+            <div class="mk">¶</div>
+            The decoded offer appears here.
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const input = document.getElementById('input');
+const out = document.getElementById('out');
+const run = document.getElementById('run');
+const clearBtn = document.getElementById('clear');
+const count = document.getElementById('count');
+
+function words(t){ return t.trim() ? t.trim().split(/\s+/).length : 0; }
+input.addEventListener('input', () => { count.textContent = words(input.value) + ' words'; });
+clearBtn.addEventListener('click', () => { input.value=''; count.textContent='0 words'; input.focus(); });
+
+const PROMPT = `You are simplifying a job offer for a candidate. Read the posting and return ONLY a JSON object, no markdown, no preamble, with exactly these keys:
+{
+ "title": "the job title, cleaned up",
+ "summary": "2-3 plain sentences on what this role actually is and who it reports to / works with",
+ "responsibilities": ["short, concrete bullets of what the person will do day to day"],
+ "must_haves": ["the genuine hard requirements only"],
+ "nice_to_haves": ["preferred / bonus items"],
+ "skills": ["short keyword tags of the key skills & tools named"]
+}
+Strip corporate boilerplate, EEO statements, and filler. Keep bullets short. If a section has nothing, use an empty array. Write in the same language as the offer.`;
+
+run.addEventListener('click', async () => {
+  const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  run.disabled = true;
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Reading the offer, cutting the noise…</div>';
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: PROMPT + "\n\n--- JOB OFFER ---\n" + text }]
+      })
+    });
+    const data = await res.json();
+    let raw = data.content.map(i => i.type === "text" ? i.text : "").join("").trim();
+    raw = raw.replace(/```json|```/g, "").trim();
+    const d = JSON.parse(raw);
+    render(d);
+  } catch (e) {
+    out.innerHTML = '<div class="err">Couldn\'t decode that one. Check the text was pasted in full and try again.</div>';
+  } finally {
+    run.disabled = false;
+  }
+});
+
+function list(arr, cls){
+  if(!arr || !arr.length) return '';
+  return '<ul class="clean '+cls+'">' + arr.map(x => '<li>'+esc(x)+'</li>').join('') + '</ul>';
+}
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function render(d){
+  let html = '';
+  if(d.title) html += '<div class="block"><div class="role-title">'+esc(d.title)+'</div></div>';
+  if(d.summary) html += '<div class="block"><div class="label">In short</div><p class="summary">'+esc(d.summary)+'</p></div>';
+  if(d.responsibilities && d.responsibilities.length) html += '<div class="block"><div class="label">What you\'d do</div>'+list(d.responsibilities,'')+'</div>';
+  if(d.must_haves && d.must_haves.length) html += '<div class="block"><div class="label">Must have</div>'+list(d.must_haves,'')+'</div>';
+  if(d.nice_to_haves && d.nice_to_haves.length) html += '<div class="block"><div class="label">Nice to have</div>'+list(d.nice_to_haves,'nice')+'</div>';
+  if(d.skills && d.skills.length) html += '<div class="block"><div class="label">Key skills</div><div class="chips">'+d.skills.map(s=>'<span class="chip">'+esc(s)+'</span>').join('')+'</div></div>';
+  out.innerHTML = html || '<div class="err">Nothing came back. Try again.</div>';
+}
+</script>
+</body>
+</html>
